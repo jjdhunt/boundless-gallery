@@ -1,0 +1,7 @@
+picture1: https://cdn.gather.town/storage.googleapis.com/gather-town.appspot.com/uploads/HSzvXHgwIAW8yq5Q/1mGFpPuZv9bgHVQhUkg9Ej
+picture1-gold: https://cdn.gather.town/storage.googleapis.com/gather-town.appspot.com/uploads/HSzvXHgwIAW8yq5Q/Nyq9wbFt2xYdUkDxW1IyMP
+
+https://gather.town/api/getMap?apiKey=vUM8gwMShRM7OugG&spaceId=HSzvXHgwIAW8yq5Q\boundless-gallery&mapId=custom-entrance
+
+
+bitnami_application_password: BPiY0d5ARXv2
