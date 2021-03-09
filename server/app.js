@@ -3,6 +3,7 @@ const https = require('https');
 const fs = require('fs');
 
 const { SPACE_ID, API_KEY } = require("./config");
+const { IP, PORT } = require("./ip");
 const MAP_ID = "custom-entrance";
 
 const PIC1_GOLD = "https://cdn.gather.town/storage.googleapis.com/gather-town.appspot.com/uploads/HSzvXHgwIAW8yq5Q/Nyq9wbFt2xYdUkDxW1IyMP";
@@ -48,8 +49,8 @@ const options = {
   cert: fs.readFileSync('certificate/cert.pem')
 };
 
-const hostname = '127.0.0.1';
-const port = 3000;
+const hostname = IP;
+const port = PORT;
 
 const server = https.createServer(options, (req, res) => {
   // res.statusCode = 200;

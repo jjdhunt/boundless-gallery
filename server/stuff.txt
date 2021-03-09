@@ -5,3 +5,4 @@ https://gather.town/api/getMap?apiKey=vUM8gwMShRM7OugG&spaceId=HSzvXHgwIAW8yq5Q\
 
 
 bitnami_application_password: BPiY0d5ARXv2
+Node-js-1 static ip: 34.210.135.78
