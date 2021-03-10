@@ -1,4 +1,6 @@
+# Don't include machine-specific newtwork or security stuff
 ip.js
+*.pem
 
 # Logs
 logs
