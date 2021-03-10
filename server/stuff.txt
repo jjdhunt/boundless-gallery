@@ -1,8 +1,10 @@
-picture1: https://cdn.gather.town/storage.googleapis.com/gather-town.appspot.com/uploads/HSzvXHgwIAW8yq5Q/1mGFpPuZv9bgHVQhUkg9Ej
-picture1-gold: https://cdn.gather.town/storage.googleapis.com/gather-town.appspot.com/uploads/HSzvXHgwIAW8yq5Q/Nyq9wbFt2xYdUkDxW1IyMP
+silver pedestal: https://cdn.gather.town/storage.googleapis.com/gather-town.appspot.com/uploads/HSzvXHgwIAW8yq5Q/mxR0MZjmEaLHNz4awHyBoC
+gold pedestal: https://cdn.gather.town/storage.googleapis.com/gather-town.appspot.com/uploads/HSzvXHgwIAW8yq5Q/VZlQ222BXgcy3TPjiFsd77
 
 https://gather.town/api/getMap?apiKey=vUM8gwMShRM7OugG&spaceId=HSzvXHgwIAW8yq5Q\boundless-gallery&mapId=custom-entrance
 
 
 bitnami_application_password: BPiY0d5ARXv2
 Node-js-1 static ip: 34.210.135.78
+
+https://127.0.0.1:3000/pieces/picture1-gold.png
