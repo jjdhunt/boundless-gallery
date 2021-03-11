@@ -123,10 +123,11 @@ const writeMap = async () => {
       },
     })
   .then(function (response) {
-    console.log(response);
     let mapData = response.data;
     var newObjects = mapData.objects;
 
+    var numNewPieces = 0;
+    var numNewPlacements = 0;
     piecesDirectory = __dirname + "/pieces";
     fs.readdirSync(piecesDirectory).forEach(pieceDir => {
       var dir = piecesDirectory + "/" + pieceDir;
@@ -138,10 +139,9 @@ const writeMap = async () => {
         if (err) throw err;
       });
 
-      //update the locations of the placement objects for this image. create them if they don't exist. set novelty timing if the image has changed
+      //update the locations of the placement objects for this image. create them if they don't exist.
       var placement = JSON.parse(fs.readFileSync(dir + '/placement.json'));
-
-      //find the placement's objects and if they don't exist or arent in the right place, create them 
+ 
       var idx_pedgold = findObject(mapData, pieceDir, "pedestal-novel");
       if (idx_pedgold==-1){
         mapData = createObject(mapData, placement.x, placement.y, "pedestal-novel", pieceDir);
@@ -164,12 +164,13 @@ const writeMap = async () => {
       if (idx_picture==-1){
         mapData = createObject(mapData, placement.x, placement.y, "picture" + placement.mountingType, pieceDir);
         idx_picture = mapData.objects.length-1;
+        numNewPlacements++;
       }else {
         mapData.objects[idx_picture].x = placement.x;
         mapData.objects[idx_picture].y = placement.y;
       }
 
-      //set novelty timing if the image has changed
+      //set novelty timing if the piece has changed
       if (placement.lastPieceName != imgFilename) {
         var startSec = Date.now() / 1E3;
         mapData.objects[idx_pedgold].objectStartTime = {_seconds: startSec, _nanoseconds: 0};
@@ -177,6 +178,7 @@ const writeMap = async () => {
         mapData.objects[idx_pedsilver].objectStartTime = {_seconds: startSec + NOVELTY_TIMEOUT, _nanoseconds: 0};
         mapData.objects[idx_pedsilver].objectExpireTime = {_seconds: 99999999999, _nanoseconds: 0};
         placement.lastPieceName = imgFilename;
+        numNewPieces++;
       }
 
       fs.writeFile(dir + '/placement.json', JSON.stringify(placement), function (err) {
@@ -184,6 +186,7 @@ const writeMap = async () => {
       })
     });
 
+    console.log(Date().toLocaleString() + ': Updated the map. Made ' + numNewPlacements + ' new placements, and ' + numNewPieces + ' new pieces.');
     
     return axios.post("https://gather.town/api/setMap", {
       apiKey: API_KEY,
@@ -216,22 +219,14 @@ const server = https.createServer(options, (req, res) => {
   // res.end('Hello World');
   //find the png picture in the requested dir
 
-  let urlParts = req.url.split('/');
+  var urlParts = req.url.split('/');
   urlParts.shift();
 
-  let numNew = 0;
+  var numNew = 0;
   if (urlParts[0] == "UPDATE") {
-    // piecesDirectory = __dirname + "/pieces";
-    // fs.readdirSync(piecesDirectory).forEach(pieceDir => {
-      
-      // numNew++;
-
       writeMap();
-    // });
-
     res.writeHead(200);
     res.end(numNew + " new pieces.");
-
   } 
 
   else {
@@ -249,5 +244,5 @@ const server = https.createServer(options, (req, res) => {
 });
 
 server.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
+  console.log(`Server running...`);
 });
