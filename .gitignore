@@ -1,3 +1,6 @@
+# Don't include any secret stuff
+secrets/
+
 # Don't include machine-specific newtwork or security stuff
 ip.js
 *.pem
