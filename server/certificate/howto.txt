@@ -1,7 +1,0 @@
-1) In MINGW64 terminal, cd to the same directory as your Node.js server file.
-2) Run the following, and provide inputs to the prompted fields:
-
-openssl genrsa -out key.pem
-openssl req -new -key key.pem -out csr.pem
-openssl x509 -req -days 9999 -in csr.pem -signkey key.pem -out cert.pem
-rm csr.pem

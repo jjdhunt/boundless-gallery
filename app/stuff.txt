@@ -8,3 +8,8 @@ bitnami_application_password: BPiY0d5ARXv2
 Node-js-1 static ip: 34.210.135.78
 
 https://127.0.0.1:3000/pieces/picture1-gold.png
+
+
+things to install:
+npm i axios
+npm install googleapis@39 --save
