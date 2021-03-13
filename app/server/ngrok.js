@@ -6,7 +6,7 @@ const { spawn } = require('child_process');
 
 // settings
 const pollInterval = 500;
-const ngrokConfig = path.resolve('ngrok.yml');
+const ngrokConfig = path.resolve('./ngrok.yml');
 
 // needed for spawning NGROK
 let ngrokBin = '';
