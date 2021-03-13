@@ -4,7 +4,7 @@ const readline = require('readline');
 const {google} = require('googleapis');
 
 // If modifying these scopes, delete token.json.
-const SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly'];
+const SCOPES = ['https://www.googleapis.com/auth/drive.readonly'];
 // The file token.json stores the user's access and refresh tokens, and is
 // created automatically when the authorization flow completes for the first
 // time.
@@ -73,14 +73,14 @@ function getAccessToken(oAuth2Client, callback) {
 /**
  * Get a list of files in the specified folder and pass them to the
  * given callback function.
- * @param {Object} credentials The authorization client credentials.
+ * @param {Object} auth The authorization client credentials.
  * @param {Object} googleFolderId The ID of the folder to list the contents of.
  * @param {function} callback The callback to call with the authorized client.
  */
 function listFilesInDir(auth, googleFolderId, callback) {
   const drive = google.drive({version: 'v3', auth});
   drive.files.list({
-    q: `'${googleFolderId}' in parents`
+    q: `'${googleFolderId}' in parents and trashed = false`
   }, (err, res) => {
     if (err) return console.log('The API returned an error: ' + err);
     callback(res.data.files);
@@ -90,7 +90,7 @@ function listFilesInDir(auth, googleFolderId, callback) {
 /**
  * Get a list of folders in the specified folder and pass them to the
  * given callback function.
- * @param {Object} credentials The authorization client credentials.
+ * @param {Object} auth The authorization client credentials.
  * @param {Object} googleFolderId The ID of the folder to list the contents of.
  * @param {function} callback The callback to call with the authorized client.
  */
@@ -105,6 +105,49 @@ function listFilesInDir(auth, googleFolderId, callback) {
 }
 
 /**
+ * Download a file
+ * @param {Object} auth The authorization client credentials.
+ * @param {Object} fileId The ID of the folder to list the contents of.
+ * @param {string} saveFullFileName filename with full path to save to.
+ */
+function downloadFile(auth, fileId, saveFullFileName) {
+  const drive = google.drive({version: 'v3', auth});
+  
+  ////
+  var dest = fs.createWriteStream(saveFullFileName);  // Please set the filename of the saved file.
+  drive.files.get({fileId: fileId, alt: 'media'}, {responseType: 'stream'},
+    function(err, res){
+       res.data
+       .on('end', () => {
+          console.log('Done');
+       })
+       .on('error', err => {
+          console.log('Error', err);
+       })
+       .pipe(dest);
+    }
+  );
+ //// 
+}
+
+// full functionality export functions - these also handle creation of oauth 
+
+/**
+ * Download a file
+ * @param {Object} googlefileId The ID of the folder to list the contents of.
+ * @param {string} saveFullFileName filename with full path to save to.
+ */
+ exports.downloadFile = function (googlefileId, saveFullFileName) {
+  fs.readFile(path.join(SECRETS_DIR,'google-api-credentials.json'), (err, content) => {
+    if (err) return console.log('Error loading client secret file:', err);
+    // Authorize a client with credentials, then call the Google Drive API.
+    //authorize(JSON.parse(content), listFiles);
+    authorize(JSON.parse(content), auth => downloadFile(auth, googlefileId, saveFullFileName));
+  });
+
+}
+
+/**
  * Get a list of files in the specified folder and pass them to the
  * given callback function.
  * @param {Object} googleFolderId The ID of the folder to list the contents of.
@@ -115,7 +158,7 @@ exports.getFilesInDir = function (dirID, callback) {
     if (err) return console.log('Error loading client secret file:', err);
     // Authorize a client with credentials, then call the Google Drive API.
     //authorize(JSON.parse(content), listFiles);
-    authorize(JSON.parse(content), a => listFilesInDir(a, dirID, callback));
+    authorize(JSON.parse(content), auth => listFilesInDir(auth, dirID, callback));
   });
 
 }
@@ -131,7 +174,7 @@ exports.getFilesInDir = function (dirID, callback) {
     if (err) return console.log('Error loading client secret file:', err);
     // Authorize a client with credentials, then call the Google Drive API.
     //authorize(JSON.parse(content), listFiles);
-    authorize(JSON.parse(content), a => listFoldersInDir(a, dirID, callback));
+    authorize(JSON.parse(content), auth => listFoldersInDir(auth, dirID, callback));
   });
 
 }
