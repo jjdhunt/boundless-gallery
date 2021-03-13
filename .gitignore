@@ -1,5 +1,5 @@
 #Don't include any artwork or generated webpages
-pieces/*/page/
+**/pieces/*/page/
 
 # Don't include any secret stuff
 secrets/
