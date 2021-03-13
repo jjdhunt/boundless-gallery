@@ -2,3 +2,4 @@ tunnels:
   app:
     proto: http  # exposes an HTTP end point
     addr: 3000   # uses local port 3000
+    authtoken: 1pctvnYprYipwxlN2lmHTYVOZN3_7ZEinPMWdN2fgZjcEcxgH
