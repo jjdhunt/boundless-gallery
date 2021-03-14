@@ -1,7 +1,7 @@
 const axios = require('axios').default;
 const fs = require('fs');
 const path = require('path');
-
+const webpage = require('./webpage.js');
 
 const { NOVELTY_TIMEOUT } = require('./config');
 
