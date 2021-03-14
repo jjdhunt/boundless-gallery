@@ -33,6 +33,8 @@ function findFile(directory, extension) {
 function findFirstFile(directory) {
   foundFile = null;
   foundFile = fs.readdirSync(directory)[0];
+  if (foundFile == undefined)
+    foundFile == null;
   return foundFile;
 }
 
