@@ -32,13 +32,7 @@ function findFile(directory, extension) {
 
 function findFirstFile(directory) {
   foundFile = null;
-  try{
-    foundFile = fs.readdirSync(directory)[0];
-  }
-  catch{
-    //art dir does not exist, so make it
-    fs.mkdirSync(directory, {recursive: true});
-  }
+  foundFile = fs.readdirSync(directory)[0];
   return foundFile;
 }
 
@@ -156,25 +150,6 @@ function fullPieceUrl(serverUrl, placementID) {
   return serverUrl + '/' + placementID + '/page/piece.html';
 }
 
-function makeArtWebpage(pageSaveDir, artPageRelativeFileName) {
-  let pageHtml = '<img src=art/' + artPageRelativeFileName + '></img>';
-  fs.writeFile(path.join(pageSaveDir, 'piece.html'), pageHtml, function (err) {
-    if (err) throw err;
-  });
-}
-
-// updates all the placement objects in the map
-// creates new objects if they dont exist
-function updateAllPictureWebpages() {
-  piecesDirectory = path.join(__dirname, 'public', 'pieces');
-  fs.readdirSync(piecesDirectory).forEach(pieceDir => {
-    var pageDir = path.join(piecesDirectory, pieceDir, 'page');
-    var artDir = path.join(pageDir, 'art');
-    artFilename = findFirstFile(artDir);
-    makeArtWebpage(pageDir, artFilename);
-  });
-}
-
 //set the server url of a picture
 function setPictureUrl(mapData,idx_picture, placementID, serverUrl) {
   var fullurl = fullPieceUrl(serverUrl, placementID);
@@ -246,7 +221,7 @@ const updateMap = async (url) => {
       artFilename = findFirstFile(artDir);
 
       //update image webpage, or create the webpage if it does not exist yet
-      makeArtWebpage(pageDir, artFilename);
+      webpage.makeArtWebpage(pageDir, artFilename);
 
       //update the locations of the placement objects for this image. create them if they don't exist.
       var placement = JSON.parse(fs.readFileSync(path.join(pieceDir, 'placement.json')));
@@ -322,4 +297,3 @@ const updateMap = async (url) => {
 // Exports
 exports.updateMap = updateMap;
 exports.updatePicturesUrlAsync = updatePicturesUrlAsync;
-exports.updateAllPictureWebpages = updateAllPictureWebpages;

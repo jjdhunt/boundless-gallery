@@ -6,6 +6,7 @@ const request = require('request');
 
 const gdrive = require('./google-drive.js');
 const gather = require('./gather.js');
+const webpage = require('./webpage.js');
 const { getNgrokUrl } = require('./ngrok');
 
 const { SPACE_ID, GOOGLE_DRIVE_BOUNDLESS_DIR_ID } = require(path.join(__dirname, '..', 'secrets','config'));
@@ -23,15 +24,9 @@ function findFile(directory, name) {
 }
 
 function deleteAllFilesInDir(directory) {
-  try{
-      fs.readdirSync(directory).forEach(file => {
-      fs.unlinkSync(path.join(directory, file));
-    });
-  }
-  catch{
-    //art dir does not exist, so make it
-    fs.mkdirSync(directory, {recursive: true});
-  }
+  fs.readdirSync(directory).forEach(file => {
+    fs.unlinkSync(path.join(directory, file));
+  });
 }
 
 function checkIfHaveFileOrReplace(placementID, gdriveFiles) {
@@ -108,7 +103,7 @@ process.stdin.on('keypress', (key, data) => {
       console.log('==============================================================');
       console.log(Date().toLocaleString());
       console.log("Manually updating all webpages...");
-      gather.updateAllPictureWebpages();
+      webpage.updateAllPictureWebpages();
     }
 
   }
