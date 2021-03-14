@@ -80,7 +80,8 @@ function getAccessToken(oAuth2Client, callback) {
 function listFilesInDir(auth, googleFolderId, callback) {
   const drive = google.drive({version: 'v3', auth});
   drive.files.list({
-    q: `'${googleFolderId}' in parents and trashed = false`
+    fields: 'files(id,name,createdTime)',
+    q: `'${googleFolderId}' in parents and trashed = false and mimeType != 'application/vnd.google-apps.folder'`
   }, (err, res) => {
     if (err) return console.log('The API returned an error: ' + err);
     callback(res.data.files);
@@ -110,7 +111,7 @@ function listFilesInDir(auth, googleFolderId, callback) {
  * @param {Object} fileId The ID of the folder to list the contents of.
  * @param {string} saveFullFileName filename with full path to save to.
  */
-function downloadFile(auth, fileId, saveFullFileName) {
+function downloadFile(auth, fileId, saveFullFileName, callback) {
   const drive = google.drive({version: 'v3', auth});
   
   ////
@@ -119,7 +120,8 @@ function downloadFile(auth, fileId, saveFullFileName) {
     function(err, res){
        res.data
        .on('end', () => {
-          console.log('Done');
+          console.log('Done Downloading');
+          callback();
        })
        .on('error', err => {
           console.log('Error', err);
@@ -137,12 +139,12 @@ function downloadFile(auth, fileId, saveFullFileName) {
  * @param {Object} googlefileId The ID of the folder to list the contents of.
  * @param {string} saveFullFileName filename with full path to save to.
  */
- exports.downloadFile = function (googlefileId, saveFullFileName) {
+ exports.downloadFile = function (googlefileId, saveFullFileName, callback) {
   fs.readFile(path.join(SECRETS_DIR,'google-api-credentials.json'), (err, content) => {
     if (err) return console.log('Error loading client secret file:', err);
     // Authorize a client with credentials, then call the Google Drive API.
     //authorize(JSON.parse(content), listFiles);
-    authorize(JSON.parse(content), auth => downloadFile(auth, googlefileId, saveFullFileName));
+    authorize(JSON.parse(content), auth => downloadFile(auth, googlefileId, saveFullFileName, callback));
   });
 
 }

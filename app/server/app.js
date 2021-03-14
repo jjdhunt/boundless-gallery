@@ -25,38 +25,58 @@ function deleteAllFilesInDir(directory) {
   });
 }
 
-function checkIfHaveFileOrReplace(placementID, files) {
-  if (files.length) {
-    //console.log('Contains the Files:');
-    files.map((file) => {
-      //console.log(`${file.name} (${file.id})`);
-      var artDir = path.join('public', 'pieces', placementID, 'page', 'art');
-      if (!findFile(artDir, file.name)) {
-        //clear out the art directory
-        deleteAllFilesInDir(artDir);
-        //then download the new art file from g drive
-        gdrive.downloadFile(file.id, path.join(artDir, file.name))
-        console.log(`Replaced placement ${placementID} with the new art file "${file.name}" from gdrive`);
-      }
+async function wait(ms) {
+  return new Promise(resolve => {
+    // setTimeout(resolve, ms);
+    console.log('set timeout for ' + ms + 'ms');
+  });
+}
+
+async function checkIfHaveFileOrReplace(placementID, gdriveFiles) {
+  var pieceDir = path.join('public', 'pieces', placementID);
+  var artLocalDir = path.join(pieceDir, 'page', 'art');
+  var placement = JSON.parse(fs.readFileSync(path.join(pieceDir, 'placement.json')));
+
+  if (gdriveFiles.length) {
+    //find the newest file in the google drive placement folder
+    var newestGDriveFile = gdriveFiles[0];
+    gdriveFiles.map((file) => {
+      if (Date.parse(file.createdTime) > Date.parse(newestGDriveFile.createdTime))
+        newestGDriveFile = file;
     });
-  } else {
-    console.log('No Files found.');
+
+    //check if this file is the same as what we have locally. If it's different, replace whatever we have locally
+    if (!findFile(artLocalDir, newestGDriveFile.name)) {
+      console.log(Date().toLocaleString());
+      console.log(`Placement ${placementID} has a new art file on google drive called "${newestGDriveFile.name}"!`);
+      console.log(`Deleting local artwork for placement ${placementID}`);
+      deleteAllFilesInDir(artLocalDir);
+      console.log(`Downloading "${newestGDriveFile.name}" from google drive for placement ${placementID}`);
+      gdrive.downloadFile(newestGDriveFile.id, path.join(artLocalDir, newestGDriveFile.name), () => getNgrokUrl().then(url => gather.updateMap(url).then(console.log('point a'))))
+    }
+    else console.log('point b');
+  }
+
+  else {
+    if (placement.lastPieceName != null) {
+      console.log(`No artwork files found in placement ${placementID} google drive folder.`);
+      console.log(`Deleting local artwork for placement ${placementID}`);
+      deleteAllFilesInDir(artLocalDir);
+      getNgrokUrl().then(url => gather.updateMap(url).then(console.log('point c')));
+    } 
+    else console.log('point d');
   }
 }
 
 function lookInEachFolder(folders){
   if (folders.length) {
-    console.log('Folders:');
     folders.map((folder) => {
-      //console.log(`${folder.name} (${folder.id})`);
-      gdrive.getFilesInDir(folder.id, files => checkIfHaveFileOrReplace(folder.name, files));
+      gdrive.getFilesInDir(folder.id, gdriveFiles => checkIfHaveFileOrReplace(folder.name, gdriveFiles));
     });
   } else {
-    console.log('No Folders found.');
+    console.log('No Google Drive placement folders found!');
   }
 }
-
-gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID, folders => lookInEachFolder(folders));
 
 //
 readline.emitKeypressEvents(process.stdin);
@@ -69,12 +89,6 @@ process.stdin.on('keypress', (key, data) => {
   } else {
     if (key == 'u') {
       gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID, folders => lookInEachFolder(folders));
-      
-      getNgrokUrl().then(url => gather.updateMap(url));
-
-      //update the urls of the pieces
-      //
-
     };
   }
 });

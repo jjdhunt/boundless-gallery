@@ -1,4 +1,3 @@
-authtoken: 1pctvnYprYipwxlN2lmHTYVOZN3_7ZEinPMWdN2fgZjcEcxgH
 tunnels:
   app:
     proto: http  # exposes an HTTP end point

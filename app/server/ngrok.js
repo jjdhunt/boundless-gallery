@@ -7,6 +7,7 @@ const { spawn } = require('child_process');
 // settings
 const pollInterval = 500;
 const ngrokConfig = path.resolve('./ngrok.yml');
+const ngrokAuthToken = path.resolve('../secrets/ngrok-authtoken.yml');
 
 // needed for spawning NGROK
 let ngrokBin = '';
@@ -26,6 +27,11 @@ async function ensureConnection(callback) {
 
   if (!fs.existsSync(ngrokConfig)) {
     console.log(`Can't run ngrok - missing ${ngrokConfig}.`);
+    return false;
+  }
+
+  if (!fs.existsSync(ngrokAuthToken)) {
+    console.log(`Can't run ngrok - missing ${ngrokAuthToken}.`);
     return false;
   }
 
@@ -88,7 +94,7 @@ async function getNgrokUrl() {
 }
 
 function startProcess() {
-  const start = ['start', '-config=' + ngrokConfig, "app"];
+  const start = ['start', '-config=' + ngrokConfig, '-config=' + ngrokAuthToken, "app"];
   const proc = spawn(ngrokBin, start, { cwd: ngrokDir, detached: true });
   proc.unref();
 }

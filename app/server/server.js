@@ -8,8 +8,6 @@ var app = express();
 
 app.use(express.static('public/pieces'));
 
-
-
 app.listen(port, async () => {
     console.log(`Listening on port ${port}`);
     await ensureConnection(url => {

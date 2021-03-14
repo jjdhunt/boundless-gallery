@@ -55,9 +55,30 @@ function findObject(mapData, placementID, name) {
   return objIdx;
 }
 
+//removes an object in mapData with the specified placementID in in its properties, and the specified _name
+//returns the mapData with the object removed
+function removeObject(mapData, placementID, name) {
+  let objIdx = -1;
+
+  for (let idx = 0; idx < mapData.objects.length; idx++) {
+    let object = mapData.objects[idx];
+    if (object.properties.hasOwnProperty('placementID')){
+      if (object.properties.placementID === placementID && object._name === name) {
+        objIdx = idx;
+      }
+    }
+  }
+
+  if (objIdx != -1){
+    mapData.objects.splice(objIdx, 1);
+  }
+
+  return mapData;
+}
+
 //creates an object of type objectType in the map at the specified location. the created object will have 
 // a 'placementID' field with value placementId added to to its properties
-function createObject(mapData, x, y, objectType, placementID) {
+function createObject(mapData, x, y, objectType, placementID, serverUrl) {
   var object_template = {
     _name: '',
     type: 0,
@@ -118,7 +139,7 @@ function createObject(mapData, x, y, objectType, placementID) {
         highlighted: PICFRAME0.highlighted,
         properties: {
           placementID: placementID,
-          url: '',
+          url: fullPieceUrl(serverUrl, placementID),
         },
         distThreshold: 1,
       })
@@ -209,7 +230,7 @@ const updateMap = async (url) => {
       
       artFilename = findFirstFile(artDir);
 
-      //update image webpage, and create the webpage if it does not exist yet
+      //update image webpage, or create the webpage if it does not exist yet
       makeArtWebpage(pageDir, artFilename);
 
       //update the locations of the placement objects for this image. create them if they don't exist.
@@ -217,7 +238,7 @@ const updateMap = async (url) => {
   
       var idx_pedgold = findObject(mapData, placementName, 'pedestal-novel');
       if (idx_pedgold==-1){
-        mapData = createObject(mapData, placement.x, placement.y, 'pedestal-novel', placementName);
+        mapData = createObject(mapData, placement.x, placement.y, 'pedestal-novel', placementName, url);
         idx_pedgold = mapData.objects.length-1;
       }else {
         mapData.objects[idx_pedgold].x = placement.x;
@@ -226,7 +247,7 @@ const updateMap = async (url) => {
 
       var idx_pedsilver = findObject(mapData, placementName, 'pedestal-old');
       if (idx_pedsilver==-1){
-        mapData = createObject(mapData, placement.x, placement.y, 'pedestal-old', placementName);
+        mapData = createObject(mapData, placement.x, placement.y, 'pedestal-old', placementName, url);
         idx_pedsilver = mapData.objects.length-1;
       }else {
         mapData.objects[idx_pedsilver].x = placement.x;
@@ -235,7 +256,7 @@ const updateMap = async (url) => {
 
       var idx_picture = findObject(mapData, placementName, 'picture');
       if (idx_picture==-1){
-        mapData = createObject(mapData, placement.x, placement.y, 'picture' + placement.mountingType, placementName);
+        mapData = createObject(mapData, placement.x, placement.y, 'picture' + placement.mountingType, placementName, url);
         idx_picture = mapData.objects.length-1;
         numNewPlacements++;
       }else {
@@ -250,8 +271,17 @@ const updateMap = async (url) => {
         mapData.objects[idx_pedgold].objectExpireTime = {_seconds: startSec + NOVELTY_TIMEOUT, _nanoseconds: 0};
         mapData.objects[idx_pedsilver].objectStartTime = {_seconds: startSec + NOVELTY_TIMEOUT, _nanoseconds: 0};
         mapData.objects[idx_pedsilver].objectExpireTime = {_seconds: 99999999999, _nanoseconds: 0};
-        placement.lastPieceName = artFilename;
         numNewPieces++;
+        placement.lastPieceName = artFilename;
+      }
+
+      //remove the picture if there is no artwork to display
+      if (artFilename === null){
+        mapData.objects[idx_pedgold].objectStartTime = {_seconds: 0, _nanoseconds: 0};
+        mapData.objects[idx_pedgold].objectExpireTime = {_seconds: startSec, _nanoseconds: 0};
+        mapData.objects[idx_pedsilver].objectStartTime = {_seconds: startSec, _nanoseconds: 0};
+        mapData.objects[idx_pedsilver].objectExpireTime = {_seconds: 99999999999, _nanoseconds: 0};
+        mapData = removeObject(mapData, placementName, 'picture');
       }
 
       fs.writeFile(path.join(pieceDir, 'placement.json'), JSON.stringify(placement), function (err) {
@@ -259,9 +289,7 @@ const updateMap = async (url) => {
       })
     });
 
-    updateAllPictureURLs(mapData, url);
-
-    console.log(Date().toLocaleString() + ': Updated the map. Made ' + numNewPlacements + ' new placements, and ' + numNewPieces + ' new pieces.');
+    console.log('Updated the Gather map. Made ' + numNewPlacements + ' new placements, and updated ' + numNewPieces + ' pieces.');
     
     return axios.post('https://gather.town/api/setMap', {
       apiKey: gatherCredentials.API_KEY,
