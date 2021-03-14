@@ -1,6 +1,12 @@
 const fs = require('fs');
 const path = require('path');
 
+function findFirstFile(directory) {
+    foundFile = null;
+    foundFile = fs.readdirSync(directory)[0];
+    return foundFile;
+  }
+  
 //webpage creation
 function makeArtWebpage(pageSaveDir, artPageRelativeFileName) {
     let pageHtml = '<img src=art/' + artPageRelativeFileName + '></img>';
