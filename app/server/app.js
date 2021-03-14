@@ -11,6 +11,15 @@ const { getNgrokUrl } = require('./ngrok');
 
 const { SPACE_ID, GOOGLE_DRIVE_BOUNDLESS_DIR_ID } = require(path.join(__dirname, '..', 'secrets','config'));
 
+function initializePieceDir() {
+  piecesDirectory = path.join(__dirname, 'public', 'pieces');
+  fs.readdirSync(piecesDirectory).forEach(pieceDir => {
+      var pageDir = path.join(piecesDirectory, pieceDir, 'page');
+      var artDir = path.join(pageDir, 'art');
+      if (!fs.existsSync(artDir)) fs.mkdirSync(artDir, {recursive: true});
+  });
+}
+
 function findFile(directory, name) {
   foundFile = false;
   try {
@@ -82,7 +91,9 @@ function doIt() {
   setTimeout(doIt, 10000);
 }
 
-gather.updateAllPictureWebpages();
+initializePieceDir();
+
+webpage.updateAllPictureWebpages();
 
 doIt();
 
