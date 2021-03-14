@@ -34,7 +34,7 @@ function findFirstFile(directory) {
   foundFile = null;
   foundFile = fs.readdirSync(directory)[0];
   if (foundFile == undefined)
-    foundFile == null;
+    foundFile = null;
   return foundFile;
 }
 
