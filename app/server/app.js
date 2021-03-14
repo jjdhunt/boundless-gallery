@@ -84,7 +84,7 @@ function lookInEachFolder(folders){
 
 function doItRepeadly() {
   gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID, folders => lookInEachFolder(folders));
-  setTimeout(doIt, 10000);
+  setTimeout(doItRepeadly, 10000);
 }
 
 initializePieceDir();
