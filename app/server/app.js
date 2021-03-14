@@ -91,6 +91,8 @@ initializePieceDir();
 
 webpage.updateAllPictureWebpages();
 
+gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID, folders => lookInEachFolder(folders));
+
 //doItRepeadly();
 
 
