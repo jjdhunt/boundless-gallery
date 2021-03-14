@@ -87,6 +87,8 @@ function doIt() {
   setTimeout(doIt, 10000);
 }
 
+gather.updateAllPictureWebpages();
+
 doIt();
 
 
@@ -102,7 +104,12 @@ process.stdin.on('keypress', (key, data) => {
       console.log(Date().toLocaleString());
       console.log("Manually updating map...");
       getNgrokUrl().then(url => gather.updateMap(url));
-    };
+    } else if (key == 'h') {
+      console.log('==============================================================');
+      console.log(Date().toLocaleString());
+      console.log("Manually updating all webpages...");
+      gather.updateAllPictureWebpages();
+    }
+
   }
 });
-

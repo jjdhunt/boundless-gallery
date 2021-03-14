@@ -32,10 +32,13 @@ function findFile(directory, extension) {
 
 function findFirstFile(directory) {
   foundFile = null;
-  fs.readdirSync(directory).forEach(file => {
-      foundFile = file;
-  });
-
+  try{
+    foundFile = fs.readdirSync(directory)[0];
+  }
+  catch{
+    //art dir does not exist, so make it
+    fs.mkdirSync(directory, {recursive: true});
+  }
   return foundFile;
 }
 
@@ -157,6 +160,18 @@ function makeArtWebpage(pageSaveDir, artPageRelativeFileName) {
   let pageHtml = '<img src=art/' + artPageRelativeFileName + '></img>';
   fs.writeFile(path.join(pageSaveDir, 'piece.html'), pageHtml, function (err) {
     if (err) throw err;
+  });
+}
+
+// updates all the placement objects in the map
+// creates new objects if they dont exist
+function updateAllPictureWebpages() {
+  piecesDirectory = path.join(__dirname, 'public', 'pieces');
+  fs.readdirSync(piecesDirectory).forEach(pieceDir => {
+    var pageDir = path.join(piecesDirectory, pieceDir, 'page');
+    var artDir = path.join(pageDir, 'art');
+    artFilename = findFirstFile(artDir);
+    makeArtWebpage(pageDir, artFilename);
   });
 }
 
@@ -305,5 +320,6 @@ const updateMap = async (url) => {
 };
 
 // Exports
- exports.updateMap = updateMap;
- exports.updatePicturesUrlAsync = updatePicturesUrlAsync;
+exports.updateMap = updateMap;
+exports.updatePicturesUrlAsync = updatePicturesUrlAsync;
+exports.updateAllPictureWebpages = updateAllPictureWebpages;
