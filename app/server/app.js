@@ -6,9 +6,19 @@ const request = require('request');
 
 const gdrive = require('./google-drive.js');
 const gather = require('./gather.js');
+const webpage = require('./webpage.js');
 const { getNgrokUrl } = require('./ngrok');
 
 const { SPACE_ID, GOOGLE_DRIVE_BOUNDLESS_DIR_ID } = require(path.join(__dirname, '..', 'secrets','config'));
+
+function initializePieceDir() {
+  piecesDirectory = path.join(__dirname, 'public', 'pieces');
+  fs.readdirSync(piecesDirectory).forEach(pieceDir => {
+      var pageDir = path.join(piecesDirectory, pieceDir, 'page');
+      var artDir = path.join(pageDir, 'art');
+      if (!fs.existsSync(artDir)) fs.mkdirSync(artDir, {recursive: true});
+  });
+}
 
 function findFile(directory, name) {
   foundFile = false;
@@ -23,15 +33,9 @@ function findFile(directory, name) {
 }
 
 function deleteAllFilesInDir(directory) {
-  try{
-      fs.readdirSync(directory).forEach(file => {
-      fs.unlinkSync(path.join(directory, file));
-    });
-  }
-  catch{
-    //art dir does not exist, so make it
-    fs.mkdirSync(directory, {recursive: true});
-  }
+  fs.readdirSync(directory).forEach(file => {
+    fs.unlinkSync(path.join(directory, file));
+  });
 }
 
 function checkIfHaveFileOrReplace(placementID, gdriveFiles) {
@@ -58,17 +62,13 @@ function checkIfHaveFileOrReplace(placementID, gdriveFiles) {
     }
   }
 
-  else {
-    try {
-      var placement = JSON.parse(fs.readFileSync(path.join(pieceDir, 'placement.json')));
-    }catch {return;}
-
-    if (placement.lastPieceName != null) {
-      console.log(`No artwork files found in placement ${placementID} google drive folder.`);
+  else { // there is no art file on the google drive
+    if (fs.readdirSync(artLocalDir).length > 0) {
+      console.log(`No artwork files found in placement ${placementID} google drive folder, but we have some local art stored.`);
       console.log(`Deleting local artwork for placement ${placementID}`);
       deleteAllFilesInDir(artLocalDir);
       getNgrokUrl().then(url => gather.updateMap(url));
-    } 
+    }
   }
 }
 
@@ -82,14 +82,18 @@ function lookInEachFolder(folders){
   }
 }
 
-function doIt() {
+function doItRepeadly() {
   gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID, folders => lookInEachFolder(folders));
-  setTimeout(doIt, 10000);
+  setTimeout(doItRepeadly, 10000);
 }
 
-gather.updateAllPictureWebpages();
+initializePieceDir();
 
-doIt();
+webpage.updateAllPictureWebpages();
+
+//gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID, folders => lookInEachFolder(folders));
+
+doItRepeadly();
 
 
 // listen for 'x' and update the map whenever we get it
@@ -103,12 +107,12 @@ process.stdin.on('keypress', (key, data) => {
       console.log('==============================================================');
       console.log(Date().toLocaleString());
       console.log("Manually updating map...");
-      getNgrokUrl().then(url => gather.updateMap(url));
+      gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID, folders => lookInEachFolder(folders));
     } else if (key == 'h') {
       console.log('==============================================================');
       console.log(Date().toLocaleString());
       console.log("Manually updating all webpages...");
-      gather.updateAllPictureWebpages();
+      webpage.updateAllPictureWebpages();
     }
 
   }
