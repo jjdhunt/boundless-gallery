@@ -6,10 +6,10 @@ function findFirstFile(directory) {
     foundFile = fs.readdirSync(directory)[0];
     return foundFile;
   }
-  
+
 //webpage creation
 function makeArtWebpage(pageSaveDir, artPageRelativeFileName) {
-    let pageHtml = '<img src=art/' + artPageRelativeFileName + '></img>';
+    let pageHtml = '<center><img src=art/' + artPageRelativeFileName + ' alt="' + artPageRelativeFileName + ' height="500" width="500"' + '></img></center>';
     fs.writeFile(path.join(pageSaveDir, 'piece.html'), pageHtml, function (err) {
     if (err) throw err;
 });
