@@ -98,7 +98,7 @@ function listFilesInDir(auth, googleFolderId, callback) {
  function listFoldersInDir(auth, googleFolderId, callback) {
   const drive = google.drive({version: 'v3', auth});
   drive.files.list({
-    q: `'${googleFolderId}' in parents and mimeType = 'application/vnd.google-apps.folder'`
+    q: `'${googleFolderId}' in parents and trashed = false and mimeType = 'application/vnd.google-apps.folder'`
   }, (err, res) => {
     if (err) return console.log('The API returned an error: ' + err);
     callback(res.data.files);

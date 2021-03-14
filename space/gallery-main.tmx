@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="45" height="29" tilewidth="32" tileheight="32" infinite="0" nextlayerid="24" nextobjectid="10">
- <tileset firstgid="1" source="../mapmaking/tilesets/more walls GATHER UNOFFICIAL.tsx"/>
- <tileset firstgid="1625" source="../mapmaking/tilesets/Gather Walls Interior 1.x.tsx"/>
- <tileset firstgid="6625" source="../mapmaking/tilesets/Gather Tables 1.x.tsx"/>
- <tileset firstgid="7691" source="../mapmaking/tilesets/Gather Floors 1.x.tsx"/>
- <tileset firstgid="10251" source="../mapmaking/tilesets/Gather Plants 1.x.tsx"/>
- <tileset firstgid="11131" source="../mapmaking/tilesets/Gather Chairs 1.x.tsx"/>
- <tileset firstgid="11931" source="../mapmaking/tilesets/Gather Walls Exterior 1.x.tsx"/>
- <tileset firstgid="14081" source="../mapmaking/tilesets/Gather Decoration 1.x.tsx"/>
- <tileset firstgid="20921" source="../mapmaking/tilesets/Gather Shadows 1.x.tsx"/>
+ <tileset firstgid="1" source="../../mapmaking/tilesets/more walls GATHER UNOFFICIAL.tsx"/>
+ <tileset firstgid="1625" source="../../mapmaking/tilesets/Gather Walls Interior 1.x.tsx"/>
+ <tileset firstgid="6625" source="../../mapmaking/tilesets/Gather Tables 1.x.tsx"/>
+ <tileset firstgid="7691" source="../../mapmaking/tilesets/Gather Floors 1.x.tsx"/>
+ <tileset firstgid="10251" source="../../mapmaking/tilesets/Gather Plants 1.x.tsx"/>
+ <tileset firstgid="11131" source="../../mapmaking/tilesets/Gather Chairs 1.x.tsx"/>
+ <tileset firstgid="11931" source="../../mapmaking/tilesets/Gather Walls Exterior 1.x.tsx"/>
+ <tileset firstgid="14081" source="../../mapmaking/tilesets/Gather Decoration 1.x.tsx"/>
+ <tileset firstgid="20921" source="../../mapmaking/tilesets/Gather Shadows 1.x.tsx"/>
  <group id="15" name="background">
   <layer id="3" name="floor1" width="45" height="29">
    <data encoding="csv">
@@ -169,7 +169,7 @@
 0,0,0,0,2147491979,8331,8332,8333,8334,8331,8332,8333,2147491981,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8964,8961,8964,8961,8964,8961,8964,8961,8964,0,0,0,0,
 0,0,0,0,2147491939,8291,8292,8293,8294,8291,8292,8293,2147491941,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8961,8964,8961,8964,8961,8964,8961,8964,8961,0,0,0,0,
 0,0,0,0,2147491979,8331,8332,8333,8334,8331,8332,8333,2147491981,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8964,8961,8964,8961,8964,8961,8964,8961,8964,0,0,0,0,
-0,0,0,0,2147491979,8331,8332,8333,8334,8331,8332,8333,2147491981,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,2147491939,8291,8292,8293,8294,8291,8292,8293,2147491941,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
