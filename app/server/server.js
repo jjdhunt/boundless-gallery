@@ -11,7 +11,7 @@ app.use(express.static('public/pieces'));
 app.listen(port, async () => {
     console.log(`Listening on port ${port}`);
     await ensureConnection(url => {
-      console.log(`Listerning to ${url}`);
+      console.log(`Listening to ${url}`);
 
       //update the urls of the pieces
       getNgrokUrl().then((v) => gather.updatePicturesUrlAsync(v))
