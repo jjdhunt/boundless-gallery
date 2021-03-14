@@ -91,9 +91,9 @@ initializePieceDir();
 
 webpage.updateAllPictureWebpages();
 
-gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID, folders => lookInEachFolder(folders));
+//gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID, folders => lookInEachFolder(folders));
 
-//doItRepeadly();
+doItRepeadly();
 
 
 // listen for 'x' and update the map whenever we get it
