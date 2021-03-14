@@ -12,17 +12,26 @@ const { SPACE_ID, GOOGLE_DRIVE_BOUNDLESS_DIR_ID } = require(path.join(__dirname,
 
 function findFile(directory, name) {
   foundFile = false;
+  try {
   fs.readdirSync(directory).forEach(file => {
     if (file == name)
       foundFile = true;
   });
   return foundFile;
 }
+  catch {return false};
+}
 
 function deleteAllFilesInDir(directory) {
-  fs.readdirSync(directory).forEach(file => {
-    fs.unlinkSync(path.join(directory, file));
-  });
+  try{
+      fs.readdirSync(directory).forEach(file => {
+      fs.unlinkSync(path.join(directory, file));
+    });
+  }
+  catch{
+    //art dir does not exist, so make it
+    fs.mkdirSync(directory, {recursive: true});
+  }
 }
 
 function checkIfHaveFileOrReplace(placementID, gdriveFiles) {
