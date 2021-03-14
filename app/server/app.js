@@ -63,10 +63,12 @@ function checkIfHaveFileOrReplace(placementID, gdriveFiles) {
   }
 
   else { // there is no art file on the google drive
-    console.log(`No artwork files found in placement ${placementID} google drive folder.`);
-    console.log(`Deleting local artwork for placement ${placementID}`);
-    deleteAllFilesInDir(artLocalDir);
-    getNgrokUrl().then(url => gather.updateMap(url));
+    if (fs.readdirSync(artLocalDir).length > 0) {
+      console.log(`No artwork files found in placement ${placementID} google drive folder, but we have some local art stored.`);
+      console.log(`Deleting local artwork for placement ${placementID}`);
+      deleteAllFilesInDir(artLocalDir);
+      getNgrokUrl().then(url => gather.updateMap(url));
+    }
   }
 }
 
