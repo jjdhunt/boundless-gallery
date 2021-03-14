@@ -62,17 +62,11 @@ function checkIfHaveFileOrReplace(placementID, gdriveFiles) {
     }
   }
 
-  else {
-    try {
-      var placement = JSON.parse(fs.readFileSync(path.join(pieceDir, 'placement.json')));
-    }catch {return;}
-
-    if (placement.lastPieceName != null) {
-      console.log(`No artwork files found in placement ${placementID} google drive folder.`);
-      console.log(`Deleting local artwork for placement ${placementID}`);
-      deleteAllFilesInDir(artLocalDir);
-      getNgrokUrl().then(url => gather.updateMap(url));
-    } 
+  else { // there is no art file on the google drive
+    console.log(`No artwork files found in placement ${placementID} google drive folder.`);
+    console.log(`Deleting local artwork for placement ${placementID}`);
+    deleteAllFilesInDir(artLocalDir);
+    getNgrokUrl().then(url => gather.updateMap(url));
   }
 }
 
