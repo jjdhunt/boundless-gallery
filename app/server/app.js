@@ -82,16 +82,16 @@ function lookInEachFolder(folders){
   }
 }
 
-function doIt() {
+function doItRepeadly() {
   gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID, folders => lookInEachFolder(folders));
-  //setTimeout(doIt, 10000);
+  setTimeout(doIt, 10000);
 }
 
 initializePieceDir();
 
 webpage.updateAllPictureWebpages();
 
-doIt();
+//doItRepeadly();
 
 
 // listen for 'x' and update the map whenever we get it
@@ -105,7 +105,7 @@ process.stdin.on('keypress', (key, data) => {
       console.log('==============================================================');
       console.log(Date().toLocaleString());
       console.log("Manually updating map...");
-      getNgrokUrl().then(url => gather.updateMap(url));
+      gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID, folders => lookInEachFolder(folders));
     } else if (key == 'h') {
       console.log('==============================================================');
       console.log(Date().toLocaleString());
