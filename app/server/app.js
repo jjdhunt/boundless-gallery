@@ -86,7 +86,7 @@ async function doItRepeadly() {
   let folders = await gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID).catch(e => { console.log(e) });
   await lookInEachFolder(folders).catch(e => { console.log(e) });
   var url = await getNgrokUrl().catch(e => { console.log(e) });
-  gather.updateMap(url);
+  await gather.updateMap(url);
   setTimeout(doItRepeadly, 10000);
 }
 
