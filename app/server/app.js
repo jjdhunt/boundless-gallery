@@ -38,7 +38,7 @@ function deleteAllFilesInDir(directory) {
   });
 }
 
-function checkIfHaveFileOrReplace(placementID, gdriveFiles) {
+async function checkIfHaveFileOrReplace(placementID, gdriveFiles) {
   var pieceDir = path.join('public', 'pieces', placementID);
   var artLocalDir = path.join(pieceDir, 'page', 'art');
 
@@ -58,7 +58,8 @@ function checkIfHaveFileOrReplace(placementID, gdriveFiles) {
       console.log(`Deleting local artwork for placement ${placementID}`);
       deleteAllFilesInDir(artLocalDir);
       console.log(`Downloading "${newestGDriveFile.name}" from google drive for placement ${placementID}`);
-      gdrive.downloadFile(newestGDriveFile.id, path.join(artLocalDir, newestGDriveFile.name), () => getNgrokUrl().then(url => gather.updateMap(url)))
+      await gdrive.downloadFile(newestGDriveFile.id, path.join(artLocalDir, newestGDriveFile.name));
+      getNgrokUrl().then(url => gather.updateMap(url))
     }
   }
 
@@ -72,18 +73,20 @@ function checkIfHaveFileOrReplace(placementID, gdriveFiles) {
   }
 }
 
-function lookInEachFolder(folders){
+async function lookInEachFolder(folders){
   if (folders.length) {
     folders.map((folder) => {
-      gdrive.getFilesInDir(folder.id, gdriveFiles => checkIfHaveFileOrReplace(folder.name, gdriveFiles));
+      let gdriveFiles = await gdrive.getFilesInDir(folder.id);
+      return checkIfHaveFileOrReplace(folder.name, gdriveFiles);
     });
   } else {
     console.log('No Google Drive placement folders found!');
   }
 }
 
-function doItRepeadly() {
-  gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID, folders => lookInEachFolder(folders));
+async function doItRepeadly() {
+  let folders = await gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID);
+  await lookInEachFolder(folders);
   setTimeout(doItRepeadly, 10000);
 }
 
