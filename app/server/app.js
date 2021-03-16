@@ -59,7 +59,6 @@ async function checkIfHaveFileOrReplace(placementID, gdriveFiles) {
       deleteAllFilesInDir(artLocalDir);
       console.log(`Downloading "${newestGDriveFile.name}" from google drive for placement ${placementID}`);
       await gdrive.downloadFile(newestGDriveFile.id, path.join(artLocalDir, newestGDriveFile.name));
-      getNgrokUrl().then(url => gather.updateMap(url))
     }
   }
 
@@ -68,7 +67,6 @@ async function checkIfHaveFileOrReplace(placementID, gdriveFiles) {
       console.log(`No artwork files found in placement ${placementID} google drive folder, but we have some local art stored.`);
       console.log(`Deleting local artwork for placement ${placementID}`);
       deleteAllFilesInDir(artLocalDir);
-      getNgrokUrl().then(url => gather.updateMap(url));
     }
   }
 }
@@ -76,7 +74,7 @@ async function checkIfHaveFileOrReplace(placementID, gdriveFiles) {
 async function lookInEachFolder(folders){
   if (folders.length) {
     folders.forEach(async (folder) => {
-      let gdriveFiles = await gdrive.getFilesInDir(folder.id);
+      let gdriveFiles = await gdrive.getFilesInDir(folder.id).catch(e => { console.log(e) });
       return checkIfHaveFileOrReplace(folder.name, gdriveFiles);
     });
   } else {
@@ -85,8 +83,10 @@ async function lookInEachFolder(folders){
 }
 
 async function doItRepeadly() {
-  let folders = await gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID);
-  await lookInEachFolder(folders);
+  let folders = await gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID).catch(e => { console.log(e) });
+  await lookInEachFolder(folders).catch(e => { console.log(e) });
+  var url = await getNgrokUrl().catch(e => { console.log(e) });
+  gather.updateMap(url);
   setTimeout(doItRepeadly, 10000);
 }
 
@@ -110,7 +110,7 @@ process.stdin.on('keypress', (key, data) => {
       console.log('==============================================================');
       console.log(Date().toLocaleString());
       console.log("Manually updating map...");
-      gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID, folders => lookInEachFolder(folders));
+      gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID).then(folders => lookInEachFolder(folders)).catch(e => { console.log(e) });
     } else if (key == 'h') {
       console.log('==============================================================');
       console.log(Date().toLocaleString());
