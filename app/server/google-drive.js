@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
+const util = require('util');
 const {google} = require('googleapis');
 
 // If modifying these scopes, delete token.json.
@@ -19,6 +20,8 @@ const TOKEN_PATH = path.join(SECRETS_DIR,'token.json');
 //   //authorize(JSON.parse(content), listFiles);
 //   authorize(JSON.parse(content), listFilesInDir);
 // });
+
+const authorizeAsync = util.promisify(authorize);
 
 /**
  * Create an OAuth2 client with the given credentials, and then execute the
@@ -111,7 +114,7 @@ function listFilesInDir(auth, googleFolderId, callback) {
  * @param {Object} fileId The ID of the folder to list the contents of.
  * @param {string} saveFullFileName filename with full path to save to.
  */
-function downloadFile(auth, fileId, saveFullFileName, callback) {
+async function downloadFile(auth, fileId, saveFullFileName) {
   const drive = google.drive({version: 'v3', auth});
   
   ////
@@ -121,10 +124,10 @@ function downloadFile(auth, fileId, saveFullFileName, callback) {
        res.data
        .on('end', () => {
           console.log('Done Downloading');
-          callback();
+          return;
        })
        .on('error', err => {
-          console.log('Error', err);
+          return console.log('Error', err);
        })
        .pipe(dest);
     }
@@ -139,12 +142,14 @@ function downloadFile(auth, fileId, saveFullFileName, callback) {
  * @param {Object} googlefileId The ID of the folder to list the contents of.
  * @param {string} saveFullFileName filename with full path to save to.
  */
- exports.downloadFile = function (googlefileId, saveFullFileName, callback) {
+ exports.downloadFile = async function (googlefileId, saveFullFileName) {
   fs.readFile(path.join(SECRETS_DIR,'google-api-credentials.json'), (err, content) => {
     if (err) return console.log('Error loading client secret file:', err);
     // Authorize a client with credentials, then call the Google Drive API.
     //authorize(JSON.parse(content), listFiles);
-    authorize(JSON.parse(content), auth => downloadFile(auth, googlefileId, saveFullFileName, callback));
+    auth = await authorizeAsync(JSON.parse(content));
+    await downloadFile(auth, googlefileId, saveFullFileName);
+    return;
   });
 
 }
