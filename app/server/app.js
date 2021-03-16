@@ -75,7 +75,7 @@ async function checkIfHaveFileOrReplace(placementID, gdriveFiles) {
 
 async function lookInEachFolder(folders){
   if (folders.length) {
-    folders.map((folder) => {
+    folders.forEach(async (folder) => {
       let gdriveFiles = await gdrive.getFilesInDir(folder.id);
       return checkIfHaveFileOrReplace(folder.name, gdriveFiles);
     });
