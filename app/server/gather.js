@@ -257,9 +257,7 @@ const updateMap = async (url) => {
         mapData = removeObject(mapData, placementName, 'picture');
       }
 
-      fs.writeFile(path.join(pieceDir, 'placement.json'), JSON.stringify(placement), function (err) {
-        if (err) throw err;
-      })
+      fs.writeFileSync(path.join(pieceDir, 'placement.json'), JSON.stringify(placement));
     });
 
     console.log('Updated the Gather map. Made ' + numNewPlacements + ' new placements, and updated ' + numNewPieces + ' pieces.');

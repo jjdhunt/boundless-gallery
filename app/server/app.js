@@ -20,9 +20,7 @@ function initializePieceDir() {
       if (!fs.existsSync(artDir)) fs.mkdirSync(artDir, {recursive: true});
       var placement = JSON.parse(fs.readFileSync(path.join(pieceDir, 'placement.json')));
       placement.lastMetadataChangeTime = 0;
-      fs.writeFile(path.join(pieceDir, 'placement.json'), JSON.stringify(placement), function (err) {
-        if (err) throw err;
-      })
+      fs.writeFileSync(path.join(pieceDir, 'placement.json'), JSON.stringify(placement));
   });
 }
 
@@ -96,7 +94,7 @@ async function checkForNewMetadata(placementID, gdriveFiles) {
         console.log(`Downloading new info.yml from google drive for placement ${placementID}`);
         await gdrive.downloadFile(infoFileOnDrive.id, path.join(pieceDir, 'info.yml'));
         placement.lastMetadataChangeTime = infoFileOnDrive.modifiedTime;
-        fs.writeFile(path.join(pieceDir, 'placement.json'), JSON.stringify(placement), function (err) {if (err) throw err;});
+        fs.writeFileSync(path.join(pieceDir, 'placement.json'), JSON.stringify(placement));
         return true;
       }
     }
