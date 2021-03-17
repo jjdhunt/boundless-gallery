@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const request = require('request');
 
+const fh = require('./filesHelper.js');
 const gdrive = require('./google-drive.js');
 const gather = require('./gather.js');
 const webpage = require('./webpage.js');
@@ -17,24 +18,6 @@ function initializePieceDir() {
       var pageDir = path.join(piecesDirectory, pieceDir, 'page');
       var artDir = path.join(pageDir, 'art');
       if (!fs.existsSync(artDir)) fs.mkdirSync(artDir, {recursive: true});
-  });
-}
-
-function findFile(directory, name) {
-  foundFile = false;
-  try {
-  fs.readdirSync(directory).forEach(file => {
-    if (file == name)
-      foundFile = true;
-  });
-  return foundFile;
-}
-  catch {return false};
-}
-
-function deleteAllFilesInDir(directory) {
-  fs.readdirSync(directory).forEach(file => {
-    fs.unlinkSync(path.join(directory, file));
   });
 }
 
@@ -54,12 +37,12 @@ async function checkIfHaveFileOrReplace(placementID, gdriveFiles) {
     });
 
     //check if this file is the same as what we have locally. If it's different, replace whatever we have locally
-    if (!findFile(artLocalDir, newestGDriveFile.name)) {
+    if (!fh.findFileByName(artLocalDir, newestGDriveFile.name)) {
       console.log('==============================================================');
       console.log(Date().toLocaleString());
       console.log(`Placement ${placementID} has a new art file on google drive called "${newestGDriveFile.name}"!`);
       console.log(`Deleting local artwork for placement ${placementID}`);
-      deleteAllFilesInDir(artLocalDir);
+      fh.deleteAllFilesInDir(artLocalDir);
       console.log(`Downloading "${newestGDriveFile.name}" from google drive for placement ${placementID}`);
       await gdrive.downloadFile(newestGDriveFile.id, path.join(artLocalDir, newestGDriveFile.name));
       return true;
@@ -70,7 +53,7 @@ async function checkIfHaveFileOrReplace(placementID, gdriveFiles) {
     if (fs.readdirSync(artLocalDir).length > 0) { //is there local content?
       console.log(`No artwork files found in placement ${placementID} google drive folder, but we have some local art stored.`);
       console.log(`Deleting local artwork for placement ${placementID}`);
-      deleteAllFilesInDir(artLocalDir);
+      fh.deleteAllFilesInDir(artLocalDir);
       return true;
     }
   }

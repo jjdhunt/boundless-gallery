@@ -2,6 +2,7 @@ const axios = require('axios').default;
 const fs = require('fs');
 const path = require('path');
 const webpage = require('./webpage.js');
+const fh = require('./filesHelper.js');
 
 const { NOVELTY_TIMEOUT } = require('./config');
 
@@ -17,26 +18,6 @@ const PICFRAME0 = {normal: 'https://cdn.gather.town/storage.googleapis.com/gathe
                    highlighted: 'https://cdn.gather.town/storage.googleapis.com/gather-town.appspot.com/uploads/HSzvXHgwIAW8yq5Q/dH1VAp6RjSryTeLOpf82Ug'};
 const PICFRAME1 = 'https://cdn.gather.town/storage.googleapis.com/gather-town.appspot.com/uploads/HSzvXHgwIAW8yq5Q/1jBzlBF7XZh7Ully4oVKSW';
 const PICFRAME2 = 'https://cdn.gather.town/storage.googleapis.com/gather-town.appspot.com/uploads/HSzvXHgwIAW8yq5Q/XUiJQ0yJFQOJKmXogxfhho';
-
-function findFile(directory, extension) {
-    foundFile = null;
-    fs.readdirSync(directory).forEach(file => {
-      if (file.split('.').pop() == extension)
-      {
-        foundFile = file;
-      }
-    });
-  
-    return foundFile;
-}
-
-function findFirstFile(directory) {
-  foundFile = null;
-  foundFile = fs.readdirSync(directory)[0];
-  if (foundFile == undefined)
-    foundFile = null;
-  return foundFile;
-}
 
 //finds an object in mapData with the specified placementID in in its properties, and the specified _name
 //returns the index of the object in the map's objects array
@@ -220,7 +201,7 @@ const updateMap = async (url) => {
       var pageDir = path.join(pieceDir, 'page');
       var artDir = path.join(pageDir, 'art');
       
-      artFilename = findFirstFile(artDir);
+      artFilename = fh.findFirstFile(artDir);
 
       //update image webpage, or create the webpage if it does not exist yet
       webpage.makeArtWebpage(pageDir, artFilename);
@@ -241,6 +222,7 @@ const updateMap = async (url) => {
       if (idx_pedsilver==-1){
         mapData = createObject(mapData, placement.x, placement.y, 'pedestal-old', placementName, url);
         idx_pedsilver = mapData.objects.length-1;
+        numNewPlacements++;
       }else {
         mapData.objects[idx_pedsilver].x = placement.x;
         mapData.objects[idx_pedsilver].y = placement.y;
@@ -250,7 +232,6 @@ const updateMap = async (url) => {
       if (idx_picture==-1){
         mapData = createObject(mapData, placement.x, placement.y, 'picture' + placement.mountingType, placementName, url);
         idx_picture = mapData.objects.length-1;
-        numNewPlacements++;
       }else {
         mapData.objects[idx_picture].x = placement.x;
         mapData.objects[idx_picture].y = placement.y;
