@@ -22,20 +22,28 @@ function findFirstFile(directory) {
 }
 
 function findFileByName(directory, name) {
-    foundFile = false;
-    try {
+  foundFile = false;
+  try {
     fs.readdirSync(directory).forEach(file => {
       if (file == name)
         foundFile = true;
-    });
+      });
     return foundFile;
   }
-    catch {return false};
-  }
+  catch {return false};
+}
   
 function deleteAllFilesInDir(directory) {
   fs.readdirSync(directory).forEach(file => {
-    fs.unlinkSync(path.join(directory, file));
+    try {fs.unlinkSync(path.join(directory, file));}
+    catch (err) {console.log(err);}
+  });
+}
+
+function deleteFileInDir(directory, filename) {
+  fs.readdirSync(directory).forEach(file => {
+    try {fs.unlinkSync(path.join(directory, filename));}
+    catch {return;}
   });
 }
 
@@ -43,3 +51,4 @@ exports.findFileByExtension = findFileByExtension;
 exports.findFirstFile = findFirstFile;
 exports.findFileByName = findFileByName;
 exports.deleteAllFilesInDir = deleteAllFilesInDir;
+exports.deleteFileInDir = deleteFileInDir;

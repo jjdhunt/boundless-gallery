@@ -204,7 +204,7 @@ const updateMap = async (url) => {
       artFilename = fh.findFirstFile(artDir);
 
       //update image webpage, or create the webpage if it does not exist yet
-      webpage.makeArtWebpage(pageDir, artFilename);
+      webpage.makeArtWebpage(pieceDir, artFilename);
 
       //update the locations of the placement objects for this image. create them if they don't exist.
       var placement = JSON.parse(fs.readFileSync(path.join(pieceDir, 'placement.json')));

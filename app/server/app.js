@@ -13,8 +13,9 @@ const { SPACE_ID, GOOGLE_DRIVE_BOUNDLESS_DIR_ID } = require(path.join(__dirname,
 
 function initializePieceDir() {
   piecesDirectory = path.join(__dirname, 'public', 'pieces');
-  fs.readdirSync(piecesDirectory).forEach(pieceDir => {
-      var pageDir = path.join(piecesDirectory, pieceDir, 'page');
+  fs.readdirSync(piecesDirectory).forEach(pieceFolder => {
+      var pieceDir = path.join(piecesDirectory, pieceFolder);
+      var pageDir = path.join(pieceDir, 'page');
       var artDir = path.join(pageDir, 'art');
       if (!fs.existsSync(artDir)) fs.mkdirSync(artDir, {recursive: true});
       var placement = JSON.parse(fs.readFileSync(path.join(pieceDir, 'placement.json')));
@@ -36,7 +37,7 @@ async function checkForNewArtFiles(placementID, gdriveFiles) {
     //find the newest art file in the google drive placement folder
     var newestGDriveArtFile = gdriveFiles[0];
     gdriveFiles.map((file) => {
-      if (file.split('.').pop() != 'yml') {
+      if (file.name != 'info.yml') {
         if (Date.parse(file.createdTime) > Date.parse(newestGDriveArtFile.createdTime))
           newestGDriveArtFile = file;
       }
@@ -53,15 +54,6 @@ async function checkForNewArtFiles(placementID, gdriveFiles) {
       await gdrive.downloadFile(newestGDriveArtFile.id, path.join(artLocalDir, newestGDriveArtFile.name));
       return true;
     }
-
-    //check if the metadatafile has been updated
-    var newestGDriveArtFile = gdriveFiles[0];
-    gdriveFiles.map((file) => {
-      if (file.split('.').pop() != 'yml') {
-        if (Date.parse(file.createdTime) > Date.parse(newestGDriveArtFile.createdTime))
-          newestGDriveArtFile = file;
-      }
-    });
   }
 
   else { // there is no art file on the google drive
@@ -84,33 +76,41 @@ async function checkForNewMetadata(placementID, gdriveFiles) {
   var artLocalDir = path.join(pieceDir, 'page', 'art');
 
   if (gdriveFiles.length) {
-    //check if the metadatafile has been updated
-    var newestGDriveArtFile = gdriveFiles[0];
+    
+    //look for info.yml file
+    var infoFileOnDrive = null;
     gdriveFiles.map((file) => {
-      if (file.split('.').pop() == 'yml') {
-        var placement = JSON.parse(fs.readFileSync(path.join(pieceDir, 'placement.json')));
-        if (Date.parse(file.modifiedTime) > Date.parse(placement.lastMetadataChangeTime)) {
-          console.log('==============================================================');
-          console.log(Date().toLocaleString());
-          console.log(`Placement ${placementID} has a new art file on google drive called "${newestGDriveArtFile.name}"!`);
-          console.log(`Deleting local info.yml for placement ${placementID}`);
-          fs.unlinkSync(path.join(pieceDir, 'info.yml'));
-          console.log(`Downloading new "info.yml" from google drive for placement ${placementID}`);
-          await gdrive.downloadFile(newestGDriveArtFile.id, path.join(pieceDir, newestGDriveArtFile.name));
-          return true;
-        }
-      }
+      if (file.name == 'info.yml')
+        infoFileOnDrive = file;
     });
+
+    //if we have an info file, check if the info has been updated
+    if (infoFileOnDrive != null) {
+      var placement = JSON.parse(fs.readFileSync(path.join(pieceDir, 'placement.json')));
+      if (Date.parse(infoFileOnDrive.modifiedTime) > Date.parse(placement.lastMetadataChangeTime)) {
+        console.log('==============================================================');
+        console.log(Date().toLocaleString());
+        console.log(`Placement ${placementID} info.yml has been modified on google drive!`);
+        console.log(`Deleting local info.yml for placement ${placementID}`);
+        fh.deleteFileInDir(pieceDir, 'info.yml');
+        console.log(`Downloading new info.yml from google drive for placement ${placementID}`);
+        await gdrive.downloadFile(infoFileOnDrive.id, path.join(pieceDir, 'info.yml'));
+        placement.lastMetadataChangeTime = infoFileOnDrive.modifiedTime;
+        fs.writeFile(path.join(pieceDir, 'placement.json'), JSON.stringify(placement), function (err) {if (err) throw err;});
+        return true;
+      }
+    }
   }
   return false;
 }
 
-async function checkFoldersForNewArt(gdriveFolders){
+async function checkFoldersForNewContent(gdriveFolders){
   var haveNewContent = false;
   if (gdriveFolders.length) {
     for (const gdriveFolder of gdriveFolders) {
       let gdriveFiles = await gdrive.getFilesInDir(gdriveFolder.id).catch(e => { console.log(e) });
       haveNewContent |= await checkForNewArtFiles(gdriveFolder.name, gdriveFiles);
+      haveNewContent |= await checkForNewMetadata(gdriveFolder.name, gdriveFiles);
     }
   } else {
     console.log('No Google Drive placement folders found!');
@@ -122,7 +122,7 @@ async function checkFoldersForNewArt(gdriveFolders){
 async function doItRepeadly() {
   try {
     let gdriveFolders = await gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID);
-    var haveNewContent = await checkFoldersForNewArt(gdriveFolders);
+    var haveNewContent = await checkFoldersForNewContent(gdriveFolders);
     if (haveNewContent) {
       var url = await getNgrokUrl();
       await gather.updateMap(url);
@@ -139,10 +139,9 @@ initializePieceDir();
 
 webpage.updateAllPictureWebpages();
 
-//gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID, folders => checkFoldersForNewArt(folders));
+//gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID, folders => checkFoldersForNewContent(folders));
 
 doItRepeadly();
-
 
 // listen for 'x' and update the map whenever we get it
 readline.emitKeypressEvents(process.stdin);
@@ -155,7 +154,7 @@ process.stdin.on('keypress', (key, data) => {
       console.log('==============================================================');
       console.log(Date().toLocaleString());
       console.log("Manually updating map...");
-      gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID).then(folders => checkFoldersForNewArt(folders)).catch(e => { console.log(e) });
+      gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID).then(folders => checkFoldersForNewContent(folders)).catch(e => { console.log(e) });
     } else if (key == 'h') {
       console.log('==============================================================');
       console.log(Date().toLocaleString());
