@@ -81,7 +81,7 @@ function getAccessToken(oAuth2Client, callback) {
 function listFilesInDir(auth, googleFolderId, callback) {
   const drive = google.drive({version: 'v3', auth});
   drive.files.list({
-    fields: 'files(id,name,createdTime)',
+    fields: 'files(id,name,createdTime,modifiedTime)',
     q: `'${googleFolderId}' in parents and trashed = false and mimeType != 'application/vnd.google-apps.folder'`
   }, (err, res) => {
     if (err) return console.log('The Google Drive API returned an error: ' + err);
@@ -125,7 +125,8 @@ function downloadFile(auth, fileId, saveFullFileName, callback) {
           callback(err, res);
        })
        .on('error', err => {
-          console.log('Error', err);
+          console.log('The Google Drive API returned an error: ' + err);
+          callback(err, res);
        })
        .pipe(dest);
     }

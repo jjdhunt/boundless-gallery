@@ -93,13 +93,19 @@ async function checkFoldersForNewArt(gdriveFolders){
 }
 
 async function doItRepeadly() {
-  let gdriveFolders = await gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID).catch(e => { console.log(e) });
-  var haveNewContent = await checkFoldersForNewArt(gdriveFolders).catch(e => { console.log(e) });
-  if (haveNewContent) {
-    var url = await getNgrokUrl().catch(e => { console.log(e) });
-    await gather.updateMap(url);
+  try {
+    let gdriveFolders = await gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID);
+    var haveNewContent = await checkFoldersForNewArt(gdriveFolders);
+    if (haveNewContent) {
+      var url = await getNgrokUrl();
+      await gather.updateMap(url);
+    }
+    setTimeout(doItRepeadly, 10000);
+  } catch(err) {
+    console.log(err);
+    setTimeout(doItRepeadly, 30000);
   }
-  setTimeout(doItRepeadly, 10000);
+  
 }
 
 initializePieceDir();
