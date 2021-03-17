@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 
 function findFileByExtension(directory, extension) {
     foundFile = null;
@@ -32,11 +33,11 @@ function findFileByName(directory, name) {
     catch {return false};
   }
   
-  function deleteAllFilesInDir(directory) {
-    fs.readdirSync(directory).forEach(file => {
-      fs.unlinkSync(path.join(directory, file));
-    });
-  }
+function deleteAllFilesInDir(directory) {
+  fs.readdirSync(directory).forEach(file => {
+    fs.unlinkSync(path.join(directory, file));
+  });
+}
 
 exports.findFileByExtension = findFileByExtension;
 exports.findFirstFile = findFirstFile;

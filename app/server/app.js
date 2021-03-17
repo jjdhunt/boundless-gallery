@@ -2,7 +2,6 @@
 const readline = require('readline');
 const fs = require('fs');
 const path = require('path');
-const request = require('request');
 
 const fh = require('./filesHelper.js');
 const gdrive = require('./google-drive.js');
@@ -18,35 +17,51 @@ function initializePieceDir() {
       var pageDir = path.join(piecesDirectory, pieceDir, 'page');
       var artDir = path.join(pageDir, 'art');
       if (!fs.existsSync(artDir)) fs.mkdirSync(artDir, {recursive: true});
+      var placement = JSON.parse(fs.readFileSync(path.join(pieceDir, 'placement.json')));
+      placement.lastMetadataChangeTime = 0;
+      fs.writeFile(path.join(pieceDir, 'placement.json'), JSON.stringify(placement), function (err) {
+        if (err) throw err;
+      })
   });
 }
 
 //returns true if the google drive art for the placement is different from what we have locally
 //updates the local art to match whats in the google drive
-async function checkIfHaveFileOrReplace(placementID, gdriveFiles) {
+async function checkForNewArtFiles(placementID, gdriveFiles) {
 
   var pieceDir = path.join('public', 'pieces', placementID);
   var artLocalDir = path.join(pieceDir, 'page', 'art');
 
   if (gdriveFiles.length) {
-    //find the newest file in the google drive placement folder
-    var newestGDriveFile = gdriveFiles[0];
+    //find the newest art file in the google drive placement folder
+    var newestGDriveArtFile = gdriveFiles[0];
     gdriveFiles.map((file) => {
-      if (Date.parse(file.createdTime) > Date.parse(newestGDriveFile.createdTime))
-        newestGDriveFile = file;
+      if (file.split('.').pop() != 'yml') {
+        if (Date.parse(file.createdTime) > Date.parse(newestGDriveArtFile.createdTime))
+          newestGDriveArtFile = file;
+      }
     });
 
     //check if this file is the same as what we have locally. If it's different, replace whatever we have locally
-    if (!fh.findFileByName(artLocalDir, newestGDriveFile.name)) {
+    if (!fh.findFileByName(artLocalDir, newestGDriveArtFile.name)) {
       console.log('==============================================================');
       console.log(Date().toLocaleString());
-      console.log(`Placement ${placementID} has a new art file on google drive called "${newestGDriveFile.name}"!`);
+      console.log(`Placement ${placementID} has a new art file on google drive called "${newestGDriveArtFile.name}"!`);
       console.log(`Deleting local artwork for placement ${placementID}`);
       fh.deleteAllFilesInDir(artLocalDir);
-      console.log(`Downloading "${newestGDriveFile.name}" from google drive for placement ${placementID}`);
-      await gdrive.downloadFile(newestGDriveFile.id, path.join(artLocalDir, newestGDriveFile.name));
+      console.log(`Downloading "${newestGDriveArtFile.name}" from google drive for placement ${placementID}`);
+      await gdrive.downloadFile(newestGDriveArtFile.id, path.join(artLocalDir, newestGDriveArtFile.name));
       return true;
     }
+
+    //check if the metadatafile has been updated
+    var newestGDriveArtFile = gdriveFiles[0];
+    gdriveFiles.map((file) => {
+      if (file.split('.').pop() != 'yml') {
+        if (Date.parse(file.createdTime) > Date.parse(newestGDriveArtFile.createdTime))
+          newestGDriveArtFile = file;
+      }
+    });
   }
 
   else { // there is no art file on the google drive
@@ -61,12 +76,41 @@ async function checkIfHaveFileOrReplace(placementID, gdriveFiles) {
   return false;
 }
 
+//returns true if the google drive info.yml for the placement has been modified
+//downloads it if it has been
+async function checkForNewMetadata(placementID, gdriveFiles) {
+
+  var pieceDir = path.join('public', 'pieces', placementID);
+  var artLocalDir = path.join(pieceDir, 'page', 'art');
+
+  if (gdriveFiles.length) {
+    //check if the metadatafile has been updated
+    var newestGDriveArtFile = gdriveFiles[0];
+    gdriveFiles.map((file) => {
+      if (file.split('.').pop() == 'yml') {
+        var placement = JSON.parse(fs.readFileSync(path.join(pieceDir, 'placement.json')));
+        if (Date.parse(file.modifiedTime) > Date.parse(placement.lastMetadataChangeTime)) {
+          console.log('==============================================================');
+          console.log(Date().toLocaleString());
+          console.log(`Placement ${placementID} has a new art file on google drive called "${newestGDriveArtFile.name}"!`);
+          console.log(`Deleting local info.yml for placement ${placementID}`);
+          fs.unlinkSync(path.join(pieceDir, 'info.yml'));
+          console.log(`Downloading new "info.yml" from google drive for placement ${placementID}`);
+          await gdrive.downloadFile(newestGDriveArtFile.id, path.join(pieceDir, newestGDriveArtFile.name));
+          return true;
+        }
+      }
+    });
+  }
+  return false;
+}
+
 async function checkFoldersForNewArt(gdriveFolders){
   var haveNewContent = false;
   if (gdriveFolders.length) {
     for (const gdriveFolder of gdriveFolders) {
       let gdriveFiles = await gdrive.getFilesInDir(gdriveFolder.id).catch(e => { console.log(e) });
-      haveNewContent |= await checkIfHaveFileOrReplace(gdriveFolder.name, gdriveFiles);
+      haveNewContent |= await checkForNewArtFiles(gdriveFolder.name, gdriveFiles);
     }
   } else {
     console.log('No Google Drive placement folders found!');
