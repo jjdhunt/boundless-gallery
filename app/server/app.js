@@ -19,8 +19,10 @@ function initializePieceDir() {
       var artDir = path.join(pageDir, 'art');
       if (!fs.existsSync(artDir)) fs.mkdirSync(artDir, {recursive: true});
       var placement = JSON.parse(fs.readFileSync(path.join(pieceDir, 'placement.json')));
-      placement.lastMetadataChangeTime = 0;
-      fs.writeFileSync(path.join(pieceDir, 'placement.json'), JSON.stringify(placement));
+      if(!placement.hasOwnProperty('lastMetadataChangeTime')){
+        placement.lastMetadataChangeTime = 0;
+        fs.writeFileSync(path.join(pieceDir, 'placement.json'), JSON.stringify(placement));
+      }
   });
 }
 
@@ -32,17 +34,18 @@ async function checkForNewArtFiles(placementID, gdriveFiles) {
   var artLocalDir = path.join(pieceDir, 'page', 'art');
 
   if (gdriveFiles.length) {
+    var gdriveFiles = gdriveFiles.filter(function(value, index, arr){return value.name != 'info.yml';});
     //find the newest art file in the google drive placement folder
+    var haveNewArt = false;
     var newestGDriveArtFile = gdriveFiles[0];
     gdriveFiles.map((file) => {
-      if (file.name != 'info.yml') {
-        if (Date.parse(file.createdTime) > Date.parse(newestGDriveArtFile.createdTime))
-          newestGDriveArtFile = file;
-      }
+      if (Date.parse(file.createdTime) > Date.parse(newestGDriveArtFile.createdTime))
+        newestGDriveArtFile = file;
+        haveNewArt = true;
     });
 
     //check if this file is the same as what we have locally. If it's different, replace whatever we have locally
-    if (!fh.findFileByName(artLocalDir, newestGDriveArtFile.name)) {
+    if (haveNewArt && !fh.findFileByName(artLocalDir, newestGDriveArtFile.name)) {
       console.log('==============================================================');
       console.log(Date().toLocaleString());
       console.log(`Placement ${placementID} has a new art file on google drive called "${newestGDriveArtFile.name}"!`);
@@ -117,14 +120,18 @@ async function checkFoldersForNewContent(gdriveFolders){
   return haveNewContent;
 }
 
+async function doItOnce() {
+  let gdriveFolders = await gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID);
+  var haveNewContent = await checkFoldersForNewContent(gdriveFolders);
+  if (haveNewContent) {
+    var url = await getNgrokUrl();
+    await gather.updateMap(url);
+  }
+}
+
 async function doItRepeadly() {
   try {
-    let gdriveFolders = await gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID);
-    var haveNewContent = await checkFoldersForNewContent(gdriveFolders);
-    if (haveNewContent) {
-      var url = await getNgrokUrl();
-      await gather.updateMap(url);
-    }
+    await doItOnce();
     setTimeout(doItRepeadly, 10000);
   } catch(err) {
     console.log(err);
@@ -133,12 +140,12 @@ async function doItRepeadly() {
   
 }
 
+// initialize //
+
 initializePieceDir();
 
-webpage.updateAllPictureWebpages();
 
-//gdrive.getFoldersInDir(GOOGLE_DRIVE_BOUNDLESS_DIR_ID, folders => checkFoldersForNewContent(folders));
-
+// go //
 doItRepeadly();
 
 // listen for 'x' and update the map whenever we get it

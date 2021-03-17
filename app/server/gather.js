@@ -130,7 +130,7 @@ function createObject(mapData, x, y, objectType, placementID, serverUrl) {
 }
 
 function fullPieceUrl(serverUrl, placementID) {
-  return serverUrl + '/' + placementID + '/page/piece.html';
+  return serverUrl + '/pieces/' + placementID + '/page/piece.html';
 }
 
 //set the server url of a picture
