@@ -5,14 +5,17 @@ html, body
     padding:0;
 }
 
-img {
-    display: block;
-	margin-left: auto;
-	margin-right: auto;
-	width: 600px;
+.imgbox {
+	display: grid;
+	height: 80%;
+}
+.center-fit {
+	max-width: 100hv;
+	max-height: 100vh;
+	margin: auto;
 }
 
-div {
+.didactic {
 	width: max-content;
 	padding: 15px;
 	margin: 20px;

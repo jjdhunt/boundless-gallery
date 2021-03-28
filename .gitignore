@@ -1,3 +1,6 @@
+#Don't include any of the piece info
+**/pieces/*/info.yml
+
 #Don't include any artwork or generated webpages
 **/pieces/*/page/
 
