@@ -16,7 +16,7 @@ function initializePieceDir() {
   fs.readdirSync(piecesDirectory).forEach(pieceFolder => {
       var pieceDir = path.join(piecesDirectory, pieceFolder);
       var pageDir = path.join(pieceDir, 'page');
-      if (!fs.existsSync(pageDir)) fs.mkdirSync(artDir, {recursive: true});
+      if (!fs.existsSync(pageDir)) fs.mkdirSync(pageDir, {recursive: true});
       var placement = JSON.parse(fs.readFileSync(path.join(pieceDir, 'placement.json')));
       if(!placement.hasOwnProperty('lastMetadataChangeTime')){
         placement.lastMetadataChangeTime = 0;
