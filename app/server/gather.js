@@ -201,13 +201,12 @@ const updateMap = async (url) => {
       var pageDir = path.join(pieceDir, 'page');
       var artDir = path.join(pageDir, 'art');
       
-      artFilename = fh.findFirstFile(artDir);
-
-      //update image webpage, or create the webpage if it does not exist yet
-      webpage.makeArtWebpage(pieceDir, artFilename);
-
+      // artFilename = fh.findFirstFile(artDir);
       //update the locations of the placement objects for this image. create them if they don't exist.
       var placement = JSON.parse(fs.readFileSync(path.join(pieceDir, 'placement.json')));
+
+      //update image webpage, or create the webpage if it does not exist yet
+      webpage.makeArtWebpage(pieceDir, placement.curPieceName);
   
       var idx_pedgold = findObject(mapData, placementName, 'pedestal-novel');
       if (idx_pedgold==-1){
@@ -238,18 +237,19 @@ const updateMap = async (url) => {
       }
 
       //set novelty timing if the piece has changed
-      if (placement.lastPieceName != artFilename) {
+      if (placement.lastPieceName != placement.curPieceName) {
         var startSec = Date.now() / 1E3;
         mapData.objects[idx_pedgold].objectStartTime = {_seconds: startSec, _nanoseconds: 0};
         mapData.objects[idx_pedgold].objectExpireTime = {_seconds: startSec + NOVELTY_TIMEOUT, _nanoseconds: 0};
         mapData.objects[idx_pedsilver].objectStartTime = {_seconds: startSec + NOVELTY_TIMEOUT, _nanoseconds: 0};
         mapData.objects[idx_pedsilver].objectExpireTime = {_seconds: 99999999999, _nanoseconds: 0};
         numNewPieces++;
-        placement.lastPieceName = artFilename;
+        // placement.lastPieceName = artFilename;
+        placement.lastPieceName = placement.curPieceName;
       }
 
       //remove the picture if there is no artwork to display
-      if (artFilename === null){
+      if (placement.curPieceName == ''){
         mapData.objects[idx_pedgold].objectStartTime = {_seconds: 0, _nanoseconds: 0};
         mapData.objects[idx_pedgold].objectExpireTime = {_seconds: startSec, _nanoseconds: 0};
         mapData.objects[idx_pedsilver].objectStartTime = {_seconds: startSec, _nanoseconds: 0};

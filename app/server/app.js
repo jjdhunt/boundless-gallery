@@ -21,8 +21,11 @@ function initializePieceDir() {
       var placement = JSON.parse(fs.readFileSync(path.join(pieceDir, 'placement.json')));
       if(!placement.hasOwnProperty('lastMetadataChangeTime')){
         placement.lastMetadataChangeTime = 0;
-        fs.writeFileSync(path.join(pieceDir, 'placement.json'), JSON.stringify(placement));
       }
+      if(!placement.hasOwnProperty('curPieceName')){
+        placement.curPieceName = '';
+      }
+      fs.writeFileSync(path.join(pieceDir, 'placement.json'), JSON.stringify(placement));
   });
 }
 
@@ -45,14 +48,17 @@ async function checkForNewArtFiles(placementID, gdriveFiles) {
     });
 
     //check if this file is the same as what we have locally. If it's different, replace whatever we have locally
-    if (haveNewArt && !fh.findFileByName(artLocalDir, newestGDriveArtFile.name)) {
+    var placement = JSON.parse(fs.readFileSync(path.join(pieceDir, 'placement.json')));
+    if (haveNewArt && placement.curPieceName!=newestGDriveArtFile.id) {
       console.log('==============================================================');
       console.log(Date().toLocaleString());
       console.log(`Placement ${placementID} has a new art file on google drive called "${newestGDriveArtFile.name}"!`);
-      console.log(`Deleting local artwork for placement ${placementID}`);
-      fh.deleteAllFilesInDir(artLocalDir);
-      console.log(`Downloading "${newestGDriveArtFile.name}" from google drive for placement ${placementID}`);
-      await gdrive.downloadFile(newestGDriveArtFile.id, path.join(artLocalDir, newestGDriveArtFile.name));
+      // console.log(`Deleting local artwork for placement ${placementID}`);
+      // fh.deleteAllFilesInDir(artLocalDir);
+      // console.log(`Downloading "${newestGDriveArtFile.name}" from google drive for placement ${placementID}`);
+      // await gdrive.downloadFile(newestGDriveArtFile.id, path.join(artLocalDir, newestGDriveArtFile.name));
+      placement.curPieceName = newestGDriveArtFile.id;
+      fs.writeFileSync(path.join(pieceDir, 'placement.json'), JSON.stringify(placement));
       return true;
     }
   }
@@ -60,8 +66,10 @@ async function checkForNewArtFiles(placementID, gdriveFiles) {
   else { // there is no art file on the google drive
     if (fs.readdirSync(artLocalDir).length > 0) { //is there local content?
       console.log(`No artwork files found in placement ${placementID} google drive folder, but we have some local art stored.`);
-      console.log(`Deleting local artwork for placement ${placementID}`);
-      fh.deleteAllFilesInDir(artLocalDir);
+      // console.log(`Deleting local artwork for placement ${placementID}`);
+      // fh.deleteAllFilesInDir(artLocalDir);
+      placement.curPieceName = '';
+      fs.writeFileSync(path.join(pieceDir, 'placement.json'), JSON.stringify(placement));
       return true;
     }
   }
