@@ -1,0 +1,28 @@
+html, body
+{
+    height: 100%;
+    margin:0;
+    padding:0;
+}
+
+img {
+    display: block;
+	margin-left: auto;
+	margin-right: auto;
+	width: 600px;
+}
+
+div {
+	width: max-content;
+	padding: 15px;
+	margin: 20px;
+	color: black;
+	border: 3px solid darkgrey;
+	background-color: white;
+}
+
+body {
+  background-color: white;
+  font-family: verdana;
+}
+
