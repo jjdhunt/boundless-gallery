@@ -16,8 +16,7 @@ function initializePieceDir() {
   fs.readdirSync(piecesDirectory).forEach(pieceFolder => {
       var pieceDir = path.join(piecesDirectory, pieceFolder);
       var pageDir = path.join(pieceDir, 'page');
-      var artDir = path.join(pageDir, 'art');
-      if (!fs.existsSync(artDir)) fs.mkdirSync(artDir, {recursive: true});
+      if (!fs.existsSync(pageDir)) fs.mkdirSync(artDir, {recursive: true});
       var placement = JSON.parse(fs.readFileSync(path.join(pieceDir, 'placement.json')));
       if(!placement.hasOwnProperty('lastMetadataChangeTime')){
         placement.lastMetadataChangeTime = 0;
@@ -34,10 +33,11 @@ function initializePieceDir() {
 async function checkForNewArtFiles(placementID, gdriveFiles) {
 
   var pieceDir = path.join('public', 'pieces', placementID);
-  var artLocalDir = path.join(pieceDir, 'page', 'art');
+  
+  var placement = JSON.parse(fs.readFileSync(path.join(pieceDir, 'placement.json')));
 
+  var gdriveFiles = gdriveFiles.filter(function(value, index, arr){return value.name != 'info.yml';});
   if (gdriveFiles.length) {
-    var gdriveFiles = gdriveFiles.filter(function(value, index, arr){return value.name != 'info.yml';});
     //find the newest art file in the google drive placement folder
     var haveNewArt = false;
     var newestGDriveArtFile = gdriveFiles[0];
@@ -47,8 +47,7 @@ async function checkForNewArtFiles(placementID, gdriveFiles) {
         haveNewArt = true;
     });
 
-    //check if this file is the same as what we have locally. If it's different, replace whatever we have locally
-    var placement = JSON.parse(fs.readFileSync(path.join(pieceDir, 'placement.json')));
+    //check if this file is the same as what we reference locally. If it's different, replace whatever we have locally
     if (haveNewArt && placement.curPieceName!=newestGDriveArtFile.id) {
       console.log('==============================================================');
       console.log(Date().toLocaleString());
@@ -64,8 +63,8 @@ async function checkForNewArtFiles(placementID, gdriveFiles) {
   }
 
   else { // there is no art file on the google drive
-    if (fs.readdirSync(artLocalDir).length > 0) { //is there local content?
-      console.log(`No artwork files found in placement ${placementID} google drive folder, but we have some local art stored.`);
+    if (placement.curPieceName != '') {
+      console.log(`Artwork for placement ${placementID} has been deleted from google drive folder.`);
       // console.log(`Deleting local artwork for placement ${placementID}`);
       // fh.deleteAllFilesInDir(artLocalDir);
       placement.curPieceName = '';
