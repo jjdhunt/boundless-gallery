@@ -84,8 +84,12 @@ function listFilesInDir(auth, googleFolderId, callback) {
     fields: 'files(id,name,createdTime,modifiedTime)',
     q: `'${googleFolderId}' in parents and trashed = false and mimeType != 'application/vnd.google-apps.folder'`
   }, (err, res) => {
-    if (err) return console.log('The Google Drive API returned an error: ' + err);
-    callback(err, res.data.files);
+    if (err) {
+      console.log('The Google Drive API returned an error: ' + err);
+      callback(err, null);
+    } else {
+      callback(err, res.data.files);
+    }
   })
 }
 
@@ -101,8 +105,12 @@ function listFilesInDir(auth, googleFolderId, callback) {
   drive.files.list({
     q: `'${googleFolderId}' in parents and trashed = false and mimeType = 'application/vnd.google-apps.folder'`
   }, (err, res) => {
-    if (err) return console.log('The Google Drive API returned an error: ' + err);
-    callback(err, res.data.files);
+    if (err) {
+      console.log('The Google Drive API returned an error: ' + err);
+      callback(err, null);
+    } else {
+      callback(err, res.data.files);
+    }
   })
 }
 

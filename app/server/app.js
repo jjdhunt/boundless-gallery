@@ -136,15 +136,19 @@ async function doItOnce() {
   }
 }
 
+const normalUpdatePeriod = 10000;
+const maxUpdatePeriod = 1280000; //max backoff 1280s (21.333minutes), takes 7 tries to get here 
+var updatePeriod = normalUpdatePeriod;
 async function doItRepeadly() {
   try {
     await doItOnce();
-    setTimeout(doItRepeadly, 10000);
+    updatePeriod = normalUpdatePeriod;
   } catch(err) {
     console.log(err);
-    setTimeout(doItRepeadly, 30000);
+    updatePeriod = Math.min(2*updatePeriod, maxUpdatePeriod); //capped exponential backoff
+    console.log('Backing off exponentially. Trying again in ' + updatePeriod/1000 + 'seconds...');
   }
-  
+  setTimeout(doItRepeadly, updatePeriod);
 }
 
 // initialize //
