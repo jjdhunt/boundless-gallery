@@ -9,11 +9,11 @@ function findFirstFile(directory) {
   }
 
 //webpage creation
-function makeArtWebpage(pieceDir, artPageRelativeFileName) {
+function makeArtWebpage(pieceDir, artGDriveId) {
     let pageDir = path.join(pieceDir, 'page');
     let pageHtml = fs.readFileSync(path.join(__dirname, 'basePiece.html'), 'utf8');
-    //let pageHtml = '<center><img src=art/' + artPageRelativeFileName + ' alt="' + artPageRelativeFileName + ' height="500" width="500"' + '></img></center>';
-    pageHtml = pageHtml.replace("ART_FILE_NAME", 'art/' + artPageRelativeFileName);
+    // pageHtml = pageHtml.replace("ART_FILE_NAME", 'art/' + artPageRelativeFileName);
+    pageHtml = pageHtml.replace("ART_FILE_NAME", `https://drive.google.com/uc?id=` + artGDriveId);
 
     try {
         var info = yaml.load(fs.readFileSync(path.join(pieceDir, 'info.yml'), 'utf8'));
