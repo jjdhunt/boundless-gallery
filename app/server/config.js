@@ -1,3 +1,3 @@
 module.exports = {
-	NOVELTY_TIMEOUT: 300,
+	NOVELTY_TIMEOUT: 604800,
 };
