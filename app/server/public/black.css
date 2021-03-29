@@ -17,15 +17,44 @@ html, body
 
 .didactic {
 	width: max-content;
-	padding: 15px;
+	height: max-content;
+	padding: 25px;
 	margin: 20px;
 	color: black;
-	border: 3px solid darkgrey;
+	border: 1px solid #cccccc;
 	background-color: white;
+	align-self: end;
 }
 
 body {
-  background-color: black;
-  font-family: verdana;
-}
+	background-color: white;
+	font-family: 'Open Sans';
+	font-size: 14px;
+	line-height: 160%;
+  }
+
+  a:link {
+	color: black;
+	background-color: transparent;
+	text-decoration: none;
+	font-weight: 600;
+  }
+  
+  a:visited {
+	color: black;
+	background-color: transparent;
+	text-decoration: none;
+  }
+  
+  a:hover {
+	color: black;
+	background-color: transparent;
+	text-decoration: underline;
+  }
+  
+  a:active {
+	color: black;
+	background-color: transparent;
+	text-decoration: underline;
+  }
 
